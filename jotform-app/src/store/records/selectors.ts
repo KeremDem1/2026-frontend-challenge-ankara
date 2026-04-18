@@ -159,18 +159,29 @@ export const selectVisibleRecords = createSelector(
   },
 );
 
+export const selectLocationsForCurrentView = createSelector(
+  [selectVisibleRecords],
+  (records): string[] => {
+    const set = new Set<string>();
+    for (const r of records) if (r.location) set.add(r.location);
+    return [...set].sort((a, b) => a.localeCompare(b));
+  },
+);
+
 export const selectFilteredVisibleRecords = (
   state: RootState,
 ): InvestigationRecord[] => {
   const records = selectVisibleRecords(state);
   const query = state.ui.recordSearch.trim().toLowerCase();
   const filter: RecordSource[] = state.ui.sourceFilter;
+  const locationFilter = state.ui.locationFilter;
   const fuzzy = state.ui.fuzzyMatching;
   const nameMap = selectCanonicalNameMap(state);
   const normalizedQuery = fuzzy ? normalizeName(query) : '';
 
   return records.filter((record) => {
     if (filter.length > 0 && !filter.includes(record.source)) return false;
+    if (locationFilter && record.location !== locationFilter) return false;
     if (!query) return true;
 
     const names = [

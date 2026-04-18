@@ -4,9 +4,11 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   selectCanonicalNameMap,
   selectFilteredVisibleRecords,
+  selectLocationsForCurrentView,
   selectVisibleRecords,
 } from '../store/records/selectors';
 import {
+  locationFilterChanged,
   recordSearchChanged,
   recordSelected,
   sourceFilterToggled,
@@ -35,6 +37,8 @@ export default function RecordsPanel() {
   );
   const recordSearch = useAppSelector((state) => state.ui.recordSearch);
   const sourceFilter = useAppSelector((state) => state.ui.sourceFilter);
+  const locationFilter = useAppSelector((state) => state.ui.locationFilter);
+  const locations = useAppSelector(selectLocationsForCurrentView);
   const visible = useAppSelector(selectVisibleRecords);
   const filtered = useAppSelector(selectFilteredVisibleRecords);
   const nameMap = useAppSelector(selectCanonicalNameMap);
@@ -115,6 +119,28 @@ export default function RecordsPanel() {
                 onClick={() => dispatch(sourceFilterToggled(source))}
               />
             ))}
+            <label className={styles.locationFilter}>
+              <span className={styles.chipsLabel}>Location</span>
+              <select
+                className={styles.locationSelect}
+                value={locationFilter ?? ''}
+                onChange={(e) =>
+                  dispatch(
+                    locationFilterChanged(
+                      e.target.value === '' ? null : e.target.value,
+                    ),
+                  )
+                }
+                disabled={locations.length === 0}
+              >
+                <option value="">All locations</option>
+                {locations.map((loc) => (
+                  <option key={loc} value={loc}>
+                    {loc}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
         </div>
       </header>
@@ -128,7 +154,7 @@ export default function RecordsPanel() {
                 ? viewAll
                   ? 'No records found.'
                   : 'This person has no records.'
-                : 'Try clearing the search or adjusting the source filters.'
+                : 'Try clearing the search or adjusting the source and location filters.'
             }
           />
         </div>

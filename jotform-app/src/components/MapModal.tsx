@@ -26,11 +26,11 @@ const ANKARA_CENTER: LatLngTuple = [39.9334, 32.8597];
 const DEFAULT_ZOOM = 12;
 
 const SOURCE_HEX: Record<RecordSource, string> = {
-  Checkins: '#3b82f6',
-  Messages: '#8b5cf6',
-  Sightings: '#f59e0b',
-  PersonalNotes: '#10b981',
-  AnonymousTips: '#ef4444',
+  Checkins: '#1f4e6b',
+  Messages: '#6b3a66',
+  Sightings: '#916408',
+  PersonalNotes: '#5a6d3c',
+  AnonymousTips: '#a0321c',
 };
 
 interface PlottedRecord {
@@ -202,9 +202,9 @@ export default function MapModal() {
                 <Polyline
                   positions={polylinePoints}
                   pathOptions={{
-                    color: '#1f2937',
+                    color: '#2a1a0d',
                     weight: 2,
-                    opacity: 0.6,
+                    opacity: 0.65,
                     dashArray: '6 6',
                   }}
                 />

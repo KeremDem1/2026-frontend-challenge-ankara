@@ -61,6 +61,38 @@
   letter-spacing: 0.5px;
 }
 
+.locationFilter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-left: var(--sp-2);
+  padding-left: var(--sp-3);
+  border-left: 1px solid var(--border);
+}
+
+.locationSelect {
+  padding: 4px var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  min-width: 160px;
+  max-width: 240px;
+}
+
+.locationSelect:focus {
+  border-color: var(--accent);
+}
+
+.locationSelect:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .search {
   width: 100%;
   padding: var(--sp-2) var(--sp-3);

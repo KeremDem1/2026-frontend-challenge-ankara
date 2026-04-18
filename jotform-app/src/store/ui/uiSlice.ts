@@ -7,6 +7,7 @@ export interface UiState {
   personSearch: string;
   recordSearch: string;
   sourceFilter: RecordSource[];
+  locationFilter: string | null;
   fuzzyMatching: boolean;
   viewAllRecords: boolean;
   mapOpen: boolean;
@@ -18,6 +19,7 @@ const initialState: UiState = {
   personSearch: '',
   recordSearch: '',
   sourceFilter: [],
+  locationFilter: null,
   fuzzyMatching: true,
   viewAllRecords: false,
   mapOpen: false,
@@ -32,6 +34,7 @@ const uiSlice = createSlice({
       state.selectedRecordId = null;
       state.recordSearch = '';
       state.sourceFilter = [];
+      state.locationFilter = null;
       state.viewAllRecords = false;
     },
     allRecordsSelected(state) {
@@ -40,6 +43,7 @@ const uiSlice = createSlice({
       state.selectedRecordId = null;
       state.recordSearch = '';
       state.sourceFilter = [];
+      state.locationFilter = null;
     },
     recordSelected(state, action: PayloadAction<string | null>) {
       state.selectedRecordId = action.payload;
@@ -58,6 +62,9 @@ const uiSlice = createSlice({
     },
     sourceFiltersReset(state) {
       state.sourceFilter = [];
+    },
+    locationFilterChanged(state, action: PayloadAction<string | null>) {
+      state.locationFilter = action.payload;
     },
     fuzzyToggled(state, action: PayloadAction<boolean | undefined>) {
       state.fuzzyMatching =
@@ -83,6 +90,7 @@ export const {
   recordSearchChanged,
   sourceFilterToggled,
   sourceFiltersReset,
+  locationFilterChanged,
   fuzzyToggled,
   selectedPersonReconciled,
   mapOpened,

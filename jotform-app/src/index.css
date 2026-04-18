@@ -1,23 +1,23 @@
 :root {
-  --bg: #f7f8fa;
-  --bg-elevated: #ffffff;
-  --bg-hover: #eef0f4;
-  --bg-selected: #fff7e6;
-  --border: #e4e7eb;
-  --border-strong: #cbd0d8;
-  --text: #1f2937;
-  --text-muted: #6b7280;
-  --text-h: #0f172a;
-  --accent: #f59e0b;
-  --accent-weak: #fde68a;
-  --danger: #ef4444;
-  --success: #10b981;
+  --bg: #f3e6c9;
+  --bg-elevated: #fbf5e2;
+  --bg-hover: #ead8b0;
+  --bg-selected: #efd7a6;
+  --border: #d4bf8a;
+  --border-strong: #a68550;
+  --text: #2a1a0d;
+  --text-muted: #6e563a;
+  --text-h: #18100a;
+  --accent: #8b2a1f;
+  --accent-weak: #e9c9bb;
+  --danger: #9b2c1f;
+  --success: #5a6d3c;
 
-  --source-checkins: #3b82f6;
-  --source-messages: #8b5cf6;
-  --source-sightings: #f59e0b;
-  --source-personalnotes: #10b981;
-  --source-anonymoustips: #ef4444;
+  --source-checkins: #1f4e6b;
+  --source-messages: #6b3a66;
+  --source-sightings: #916408;
+  --source-personalnotes: #5a6d3c;
+  --source-anonymoustips: #a0321c;
 
   --sp-1: 4px;
   --sp-2: 8px;
@@ -31,8 +31,10 @@
   --r-md: 8px;
   --r-lg: 12px;
 
-  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font: 'Lora', 'Nunito', 'Segoe UI', -apple-system, BlinkMacSystemFont,
+    system-ui, sans-serif;
+  --mono: 'Courier Prime', 'Courier New', ui-monospace, SFMono-Regular, Menlo,
+    monospace;
 
   --fs-xs: 12px;
   --fs-sm: 13px;
@@ -58,8 +60,11 @@ body {
   margin: 0;
   font-family: var(--font);
   font-size: var(--fs-md);
+  line-height: 1.55;
   color: var(--text);
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.28 0 0 0 0 0.18 0 0 0 0 0.08 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-blend-mode: multiply;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
