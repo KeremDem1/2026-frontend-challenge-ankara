@@ -9,6 +9,7 @@ export interface UiState {
   sourceFilter: RecordSource[];
   fuzzyMatching: boolean;
   viewAllRecords: boolean;
+  mapOpen: boolean;
 }
 
 const initialState: UiState = {
@@ -19,6 +20,7 @@ const initialState: UiState = {
   sourceFilter: [],
   fuzzyMatching: true,
   viewAllRecords: false,
+  mapOpen: false,
 };
 
 const uiSlice = createSlice({
@@ -64,6 +66,12 @@ const uiSlice = createSlice({
     selectedPersonReconciled(state, action: PayloadAction<string | null>) {
       state.selectedPersonName = action.payload;
     },
+    mapOpened(state) {
+      state.mapOpen = true;
+    },
+    mapClosed(state) {
+      state.mapOpen = false;
+    },
   },
 });
 
@@ -77,6 +85,8 @@ export const {
   sourceFiltersReset,
   fuzzyToggled,
   selectedPersonReconciled,
+  mapOpened,
+  mapClosed,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

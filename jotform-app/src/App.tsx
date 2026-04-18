@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import './App.css';
 import { useAppDispatch, useAppSelector } from './store/hooks';
 import { fetchAllRecords } from './store/records/recordsThunks';
@@ -12,12 +12,15 @@ import {
 } from './store/records/selectors';
 import {
   fuzzyToggled,
+  mapOpened,
   selectedPersonReconciled,
 } from './store/ui/uiSlice';
 import PeoplePanel from './components/PeoplePanel';
 import RecordsPanel from './components/RecordsPanel';
 import DetailPanel from './components/DetailPanel';
 import EmptyState from './components/EmptyState';
+
+const MapModal = lazy(() => import('./components/MapModal'));
 
 function App() {
   const dispatch = useAppDispatch();
@@ -31,6 +34,7 @@ function App() {
   const selectedPersonName = useAppSelector(
     (state) => state.ui.selectedPersonName,
   );
+  const mapOpen = useAppSelector((state) => state.ui.mapOpen);
   const nameMap = useAppSelector(selectCanonicalNameMap);
 
   useEffect(() => {
@@ -85,6 +89,15 @@ function App() {
               />
               <span>Merge similar names</span>
             </label>
+            <button
+              type="button"
+              className="mapButton"
+              onClick={() => dispatch(mapOpened())}
+              title="Plot the current records on a map"
+            >
+              <span aria-hidden>◎</span>
+              <span>Open map</span>
+            </button>
           </div>
         )}
       </header>
@@ -126,6 +139,12 @@ function App() {
           <RecordsPanel />
           <DetailPanel />
         </main>
+      )}
+
+      {mapOpen && (
+        <Suspense fallback={null}>
+          <MapModal />
+        </Suspense>
       )}
     </div>
   );
