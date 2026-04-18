@@ -1,5 +1,8 @@
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectSelectedRecord } from '../store/records/selectors';
+import {
+  selectCanonicalNameMap,
+  selectSelectedRecord,
+} from '../store/records/selectors';
 import { personSelected, recordSelected } from '../store/ui/uiSlice';
 import { formatTimestamp } from '../utils/format';
 import EmptyState from './EmptyState';
@@ -9,6 +12,7 @@ import styles from './DetailPanel.module.css';
 export default function DetailPanel() {
   const dispatch = useAppDispatch();
   const record = useAppSelector(selectSelectedRecord);
+  const nameMap = useAppSelector(selectCanonicalNameMap);
 
   if (!record) {
     return (
@@ -23,7 +27,10 @@ export default function DetailPanel() {
     );
   }
 
-  const followChain = (name: string) => dispatch(personSelected(name));
+  const followChain = (name: string) => {
+    const canonical = nameMap.get(name)?.canonical ?? name;
+    dispatch(personSelected(canonical));
+  };
 
   return (
     <aside className={styles.panel} aria-label="Record detail">

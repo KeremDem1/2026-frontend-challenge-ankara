@@ -71,6 +71,11 @@ export default function PeoplePanel() {
                     {person.recordCount === 1 ? 'record' : 'records'}
                   </span>
                 </div>
+                {person.aliases.length > 0 && (
+                  <div className={styles.aliases} title="Merged name variants">
+                    Also: {person.aliases.join(', ')}
+                  </div>
+                )}
                 <div className={styles.sources}>
                   {sources.map((source) => (
                     <SourceBadge

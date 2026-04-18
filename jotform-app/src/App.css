@@ -34,6 +34,13 @@
   color: var(--text-muted);
 }
 
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-5);
+  flex-wrap: wrap;
+}
+
 .globalStats {
   display: flex;
   gap: var(--sp-4);
@@ -45,6 +52,28 @@
 .globalStats strong {
   color: var(--text);
   font-weight: 600;
+}
+
+.fuzzyToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+  padding: var(--sp-1) var(--sp-2);
+  border-radius: var(--r-sm);
+  transition: color 120ms ease;
+}
+
+.fuzzyToggle:hover {
+  color: var(--text);
+}
+
+.fuzzyToggle input {
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .shell {

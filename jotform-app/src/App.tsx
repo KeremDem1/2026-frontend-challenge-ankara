@@ -4,11 +4,16 @@ import { useAppDispatch, useAppSelector } from './store/hooks';
 import { fetchAllRecords } from './store/records/recordsThunks';
 import {
   selectAllRecords,
+  selectCanonicalNameMap,
   selectPeople,
   selectRecordsError,
   selectRecordsStatus,
   selectUniqueLocations,
 } from './store/records/selectors';
+import {
+  fuzzyToggled,
+  selectedPersonReconciled,
+} from './store/ui/uiSlice';
 import PeoplePanel from './components/PeoplePanel';
 import RecordsPanel from './components/RecordsPanel';
 import DetailPanel from './components/DetailPanel';
@@ -22,10 +27,29 @@ function App() {
   const records = useAppSelector(selectAllRecords);
   const people = useAppSelector(selectPeople);
   const locations = useAppSelector(selectUniqueLocations);
+  const fuzzyMatching = useAppSelector((state) => state.ui.fuzzyMatching);
+  const selectedPersonName = useAppSelector(
+    (state) => state.ui.selectedPersonName,
+  );
+  const nameMap = useAppSelector(selectCanonicalNameMap);
 
   useEffect(() => {
     if (status === 'idle') dispatch(fetchAllRecords());
   }, [dispatch, status]);
+
+  useEffect(() => {
+    if (!selectedPersonName) return;
+    const entry = nameMap.get(selectedPersonName);
+    if (entry && entry.canonical === selectedPersonName) return;
+    if (entry) {
+      dispatch(selectedPersonReconciled(entry.canonical));
+      return;
+    }
+    const anyEntry = [...nameMap.values()].find(
+      (e) => e.canonical === selectedPersonName,
+    );
+    if (!anyEntry) dispatch(selectedPersonReconciled(null));
+  }, [dispatch, nameMap, selectedPersonName]);
 
   const isInitialLoad = status === 'pending' && records.length === 0;
   const retry = () => dispatch(fetchAllRecords());
@@ -38,16 +62,29 @@ function App() {
           <span className="brandSubtitle">Investigation dashboard</span>
         </div>
         {status === 'succeeded' && records.length > 0 && (
-          <div className="globalStats">
-            <span>
-              <strong>{records.length}</strong> records
-            </span>
-            <span>
-              <strong>{people.length}</strong> people
-            </span>
-            <span>
-              <strong>{locations.length}</strong> locations
-            </span>
+          <div className="headerRight">
+            <div className="globalStats">
+              <span>
+                <strong>{records.length}</strong> records
+              </span>
+              <span>
+                <strong>{people.length}</strong> people
+              </span>
+              <span>
+                <strong>{locations.length}</strong> locations
+              </span>
+            </div>
+            <label
+              className="fuzzyToggle"
+              title="Merge near-duplicate name variants (e.g. Kağan, Kagan, Kağan A.)"
+            >
+              <input
+                type="checkbox"
+                checked={fuzzyMatching}
+                onChange={(e) => dispatch(fuzzyToggled(e.target.checked))}
+              />
+              <span>Merge similar names</span>
+            </label>
           </div>
         )}
       </header>
