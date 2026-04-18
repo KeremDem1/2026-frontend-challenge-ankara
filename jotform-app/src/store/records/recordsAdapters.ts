@@ -7,12 +7,52 @@ import {
   parseJotformTimestamp,
 } from '../../utils/parsers';
 
-const PERSON_KEYS = ['personName', 'name', 'from', 'author', 'reporter'];
-const WITH_KEYS = ['seenWith', 'with', 'to', 'recipient'];
-const TEXT_KEYS = ['note', 'message', 'tip', 'comment', 'content', 'text'];
+const PERSON_KEYS = [
+  'personName',
+  'name',
+  'from',
+  'sender',
+  'senderName',
+  'author',
+  'writer',
+  'authorName',
+  'reporter',
+  'observer',
+  'about',
+  'subject',
+  'target',
+  'suspect',
+  'suspectName',
+  'tipAbout',
+];
+const WITH_KEYS = [
+  'seenWith',
+  'with',
+  'to',
+  'recipient',
+  'recipientName',
+];
+const TEXT_KEYS = [
+  'note',
+  'message',
+  'tip',
+  'comment',
+  'content',
+  'text',
+  'body',
+  'description',
+];
 const LOCATION_KEYS = ['location', 'place', 'where'];
 const COORDS_KEYS = ['coordinates', 'coords', 'geo'];
 const TIME_KEYS = ['timestamp', 'time', 'when', 'date'];
+const MENTIONS_KEYS = [
+  'mentionedPeople',
+  'mentions',
+  'people',
+  'involvedPeople',
+  'peopleInvolved',
+];
+const CONFIDENCE_KEYS = ['confidence', 'certainty', 'reliability'];
 
 function pickAnswer(
   index: Record<string, JotformAnswer>,
@@ -23,6 +63,14 @@ function pickAnswer(
     if (value) return value;
   }
   return undefined;
+}
+
+function parseNameList(raw: string | undefined): string[] {
+  if (!raw) return [];
+  return raw
+    .split(/[,;]/)
+    .map((name) => name.trim())
+    .filter((name) => name.length > 0);
 }
 
 function dedupe(values: (string | undefined)[]): string[] {
@@ -37,6 +85,7 @@ function buildRecord(
 
   const personName = pickAnswer(answers, PERSON_KEYS);
   const seenWith = pickAnswer(answers, WITH_KEYS);
+  const mentions = parseNameList(pickAnswer(answers, MENTIONS_KEYS));
   const timestamp = pickAnswer(answers, TIME_KEYS);
 
   return {
@@ -47,7 +96,8 @@ function buildRecord(
 
     personName,
     seenWith,
-    participants: dedupe([personName, seenWith]),
+    mentions: mentions.length > 0 ? mentions : undefined,
+    participants: dedupe([personName, seenWith, ...mentions]),
 
     location: pickAnswer(answers, LOCATION_KEYS),
     coordinates: parseCoordinates(pickAnswer(answers, COORDS_KEYS)),
@@ -56,6 +106,8 @@ function buildRecord(
     timestampMs: parseJotformTimestamp(timestamp),
 
     text: pickAnswer(answers, TEXT_KEYS),
+
+    confidence: pickAnswer(answers, CONFIDENCE_KEYS),
 
     rawAnswers: submission.answers,
   };

@@ -1,66 +1,96 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import './App.css';
 import { useAppDispatch, useAppSelector } from './store/hooks';
-import { fetchAllForms } from './store/forms/formsThunks';
 import { fetchAllRecords } from './store/records/recordsThunks';
 import {
   selectAllRecords,
+  selectPeople,
   selectRecordsError,
   selectRecordsStatus,
   selectUniqueLocations,
-  selectUniquePeople,
 } from './store/records/selectors';
+import PeoplePanel from './components/PeoplePanel';
+import RecordsPanel from './components/RecordsPanel';
+import DetailPanel from './components/DetailPanel';
+import EmptyState from './components/EmptyState';
 
 function App() {
   const dispatch = useAppDispatch();
 
-  const formsStatus = useAppSelector((state) => state.forms.status);
-  const recordsStatus = useAppSelector(selectRecordsStatus);
-  const recordsError = useAppSelector(selectRecordsError);
+  const status = useAppSelector(selectRecordsStatus);
+  const error = useAppSelector(selectRecordsError);
   const records = useAppSelector(selectAllRecords);
-  const people = useAppSelector(selectUniquePeople);
+  const people = useAppSelector(selectPeople);
   const locations = useAppSelector(selectUniqueLocations);
 
   useEffect(() => {
-    if (formsStatus === 'idle') dispatch(fetchAllForms());
-    if (recordsStatus === 'idle') dispatch(fetchAllRecords());
-  }, [dispatch, formsStatus, recordsStatus]);
+    if (status === 'idle') dispatch(fetchAllRecords());
+  }, [dispatch, status]);
 
-  const countsBySource = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const record of records) {
-      counts[record.source] = (counts[record.source] ?? 0) + 1;
-    }
-    return counts;
-  }, [records]);
+  const isInitialLoad = status === 'pending' && records.length === 0;
+  const retry = () => dispatch(fetchAllRecords());
 
   return (
-    <>
-      <h1>Missing Podo: The Ankara Case</h1>
+    <div className="app">
+      <header className="appHeader">
+        <div className="brand">
+          <h1 className="brandTitle">Missing Podo: The Ankara Case</h1>
+          <span className="brandSubtitle">Investigation dashboard</span>
+        </div>
+        {status === 'succeeded' && records.length > 0 && (
+          <div className="globalStats">
+            <span>
+              <strong>{records.length}</strong> records
+            </span>
+            <span>
+              <strong>{people.length}</strong> people
+            </span>
+            <span>
+              <strong>{locations.length}</strong> locations
+            </span>
+          </div>
+        )}
+      </header>
 
-      {recordsStatus === 'pending' && <p>Loading records...</p>}
-      {recordsStatus === 'failed' && <p>Error: {recordsError}</p>}
-
-      {recordsStatus === 'succeeded' && (
-        <section>
-          <p>
-            Loaded <strong>{records.length}</strong> records across{' '}
-            <strong>{Object.keys(countsBySource).length}</strong> sources.
-          </p>
-          <ul>
-            {Object.entries(countsBySource).map(([source, count]) => (
-              <li key={source}>
-                {source}: {count}
-              </li>
-            ))}
-          </ul>
-          <p>
-            Unique people: <strong>{people.length}</strong> &middot; Unique
-            locations: <strong>{locations.length}</strong>
-          </p>
-        </section>
+      {isInitialLoad && (
+        <div className="fullState">
+          <div className="loadingWrap">
+            <div className="spinner" aria-hidden />
+            <span>Loading records...</span>
+          </div>
+        </div>
       )}
-    </>
+
+      {status === 'failed' && (
+        <div className="fullState">
+          <EmptyState
+            title="Couldn't load records"
+            description={error ?? 'Something went wrong while talking to Jotform.'}
+            actionLabel="Retry"
+            onAction={retry}
+          />
+        </div>
+      )}
+
+      {status === 'succeeded' && records.length === 0 && (
+        <div className="fullState">
+          <EmptyState
+            title="No records yet"
+            description="None of the five forms returned any submissions."
+            actionLabel="Refresh"
+            onAction={retry}
+          />
+        </div>
+      )}
+
+      {status === 'succeeded' && records.length > 0 && (
+        <main className="shell">
+          <PeoplePanel />
+          <RecordsPanel />
+          <DetailPanel />
+        </main>
+      )}
+    </div>
   );
 }
 

@@ -1,0 +1,52 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: 2px var(--sp-2);
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0.2px;
+  color: var(--source-color, var(--text-muted));
+  background: color-mix(in srgb, var(--source-color, var(--text-muted)) 12%, transparent);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.clickable {
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.clickable:hover {
+  background: color-mix(in srgb, var(--source-color, var(--text-muted)) 22%, transparent);
+}
+
+.active {
+  color: #fff;
+  background: var(--source-color, var(--text-muted));
+}
+
+.inactive {
+  color: var(--text-muted);
+  background: transparent;
+  border-color: var(--border);
+}
+
+.inactive:hover {
+  background: var(--bg-hover);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+}

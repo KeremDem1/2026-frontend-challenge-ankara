@@ -20,7 +20,9 @@ export interface InvestigationRecord {
 
   personName?: string;
   seenWith?: string;
+  mentions?: string[];
   participants: string[];
+  confidence?: string;
 
   location?: string;
   coordinates?: GeoPoint;
