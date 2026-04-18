@@ -1,10 +1,12 @@
 import type { RecordSource } from '../types/record';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
+  selectAllRecords,
   selectFilteredPeople,
   selectPeople,
 } from '../store/records/selectors';
 import {
+  allRecordsSelected,
   personSearchChanged,
   personSelected,
 } from '../store/ui/uiSlice';
@@ -16,8 +18,10 @@ export default function PeoplePanel() {
   const dispatch = useAppDispatch();
   const people = useAppSelector(selectFilteredPeople);
   const totalPeople = useAppSelector(selectPeople).length;
+  const totalRecords = useAppSelector(selectAllRecords).length;
   const search = useAppSelector((state) => state.ui.personSearch);
   const selectedName = useAppSelector((state) => state.ui.selectedPersonName);
+  const viewAll = useAppSelector((state) => state.ui.viewAllRecords);
 
   return (
     <aside className={styles.panel} aria-label="People">
@@ -38,18 +42,40 @@ export default function PeoplePanel() {
         />
       </header>
 
-      {people.length === 0 ? (
-        <EmptyState
-          title="No people match"
-          description={
-            search
-              ? `No one matches "${search}".`
-              : 'No participants found in the records.'
+      <div className={styles.list}>
+        <button
+          type="button"
+          className={
+            viewAll
+              ? `${styles.allItem} ${styles.itemSelected}`
+              : styles.allItem
           }
-        />
-      ) : (
-        <div className={styles.list}>
-          {people.map((person) => {
+          onClick={() => dispatch(allRecordsSelected())}
+          aria-pressed={viewAll}
+          title="Show every record across all people"
+        >
+          <div className={styles.itemTop}>
+            <span className={styles.name}>All records</span>
+            <span className={styles.recordCount}>
+              {totalRecords} {totalRecords === 1 ? 'record' : 'records'}
+            </span>
+          </div>
+          <div className={styles.allHint}>
+            Browse the full chronological feed
+          </div>
+        </button>
+
+        {people.length === 0 ? (
+          <EmptyState
+            title="No people match"
+            description={
+              search
+                ? `No one matches "${search}".`
+                : 'No participants found in the records.'
+            }
+          />
+        ) : (
+          people.map((person) => {
             const isSelected = person.name === selectedName;
             const sources = Object.keys(person.sourceCounts) as RecordSource[];
             return (
@@ -87,9 +113,9 @@ export default function PeoplePanel() {
                 </div>
               </button>
             );
-          })}
-        </div>
-      )}
+          })
+        )}
+      </div>
     </aside>
   );
 }

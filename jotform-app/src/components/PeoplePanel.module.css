@@ -120,3 +120,28 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.allItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-3);
+  border-radius: var(--r-md);
+  background: transparent;
+  border: 1px dashed var(--border-strong);
+  text-align: left;
+  width: 100%;
+  margin-bottom: var(--sp-2);
+  transition: background 120ms ease, border-color 120ms ease;
+  cursor: pointer;
+}
+
+.allItem:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+}
+
+.allHint {
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}

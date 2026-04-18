@@ -2,8 +2,9 @@ import { useMemo } from 'react';
 import type { RecordSource } from '../types/record';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
-  selectFilteredRecordsForSelectedPerson,
-  selectRecordsForSelectedPerson,
+  selectCanonicalNameMap,
+  selectFilteredVisibleRecords,
+  selectVisibleRecords,
 } from '../store/records/selectors';
 import {
   recordSearchChanged,
@@ -28,33 +29,40 @@ export default function RecordsPanel() {
   const selectedPersonName = useAppSelector(
     (state) => state.ui.selectedPersonName,
   );
+  const viewAll = useAppSelector((state) => state.ui.viewAllRecords);
   const selectedRecordId = useAppSelector(
     (state) => state.ui.selectedRecordId,
   );
   const recordSearch = useAppSelector((state) => state.ui.recordSearch);
   const sourceFilter = useAppSelector((state) => state.ui.sourceFilter);
-  const allForPerson = useAppSelector(selectRecordsForSelectedPerson);
-  const filtered = useAppSelector(selectFilteredRecordsForSelectedPerson);
+  const visible = useAppSelector(selectVisibleRecords);
+  const filtered = useAppSelector(selectFilteredVisibleRecords);
+  const nameMap = useAppSelector(selectCanonicalNameMap);
+
+  const resolveName = (raw: string): { canonical: string; raw: string } => {
+    const canonical = nameMap.get(raw)?.canonical ?? raw;
+    return { canonical, raw };
+  };
 
   const stats = useMemo(() => {
     const locations = new Set(
-      allForPerson.map((r) => r.location).filter(Boolean) as string[],
+      visible.map((r) => r.location).filter(Boolean) as string[],
     );
-    const sources = new Set(allForPerson.map((r) => r.source));
+    const sources = new Set(visible.map((r) => r.source));
     return {
-      total: allForPerson.length,
+      total: visible.length,
       locations: locations.size,
       sources: sources.size,
     };
-  }, [allForPerson]);
+  }, [visible]);
 
-  if (!selectedPersonName) {
+  if (!viewAll && !selectedPersonName) {
     return (
       <section className={styles.panel}>
         <div className={styles.placeholder}>
           <EmptyState
-            title="Pick a person"
-            description="Select someone from the People list to see their timeline of events across all sources."
+            title="Pick a person or view all"
+            description="Select someone from the People list to see their timeline, or click 'All records' to browse every record."
           />
         </div>
       </section>
@@ -62,12 +70,16 @@ export default function RecordsPanel() {
   }
 
   const sourceFilterActive = sourceFilter.length > 0;
+  const headerTitle = viewAll ? 'All records' : selectedPersonName!;
+  const searchPlaceholder = viewAll
+    ? 'Search all records (text, person, location, mentions)...'
+    : 'Search within records (text, location, seen with)...';
 
   return (
     <section className={styles.panel} aria-label="Records timeline">
       <header className={styles.header}>
         <div className={styles.titleRow}>
-          <h2 className={styles.title}>{selectedPersonName}</h2>
+          <h2 className={styles.title}>{headerTitle}</h2>
           <div className={styles.stats}>
             <span>
               <strong>{stats.total}</strong>{' '}
@@ -88,7 +100,7 @@ export default function RecordsPanel() {
           <input
             type="search"
             className={styles.search}
-            placeholder="Search within records (text, location, seen with)..."
+            placeholder={searchPlaceholder}
             value={recordSearch}
             onChange={(e) => dispatch(recordSearchChanged(e.target.value))}
           />
@@ -112,8 +124,10 @@ export default function RecordsPanel() {
           <EmptyState
             title="No matching records"
             description={
-              allForPerson.length === 0
-                ? 'This person has no records.'
+              visible.length === 0
+                ? viewAll
+                  ? 'No records found.'
+                  : 'This person has no records.'
                 : 'Try clearing the search or adjusting the source filters.'
             }
           />
@@ -137,7 +151,9 @@ export default function RecordsPanel() {
                 <div className={styles.itemTop}>
                   <div className={styles.meta}>
                     <SourceBadge source={record.source} />
-                    <span>{formatTimestamp(record.timestamp, record.timestampMs)}</span>
+                    <span>
+                      {formatTimestamp(record.timestamp, record.timestampMs)}
+                    </span>
                     {record.location && (
                       <>
                         <span>&middot;</span>
@@ -152,15 +168,40 @@ export default function RecordsPanel() {
                   <p className={styles.text}>{truncate(record.text, 200)}</p>
                 )}
                 <div className={styles.itemBottom}>
-                  {record.seenWith && (
-                    <span className={styles.withPill}>
-                      with {record.seenWith}
-                    </span>
-                  )}
-                  {record.personName &&
-                    record.personName !== selectedPersonName && (
-                      <span className={styles.withPill}>
-                        reported about {record.personName}
+                  {viewAll &&
+                    record.personName &&
+                    (() => {
+                      const { canonical, raw } = resolveName(record.personName);
+                      return (
+                        <span
+                          className={styles.primaryPill}
+                          title={canonical !== raw ? `Submitted as "${raw}"` : undefined}
+                        >
+                          {canonical}
+                        </span>
+                      );
+                    })()}
+                  {record.seenWith &&
+                    (() => {
+                      const { canonical, raw } = resolveName(record.seenWith);
+                      return (
+                        <span
+                          className={styles.withPill}
+                          title={canonical !== raw ? `Submitted as "${raw}"` : undefined}
+                        >
+                          with {canonical}
+                        </span>
+                      );
+                    })()}
+                  {!viewAll &&
+                    record.personName &&
+                    resolveName(record.personName).canonical !==
+                      selectedPersonName && (
+                      <span
+                        className={styles.withPill}
+                        title={`Submitted as "${record.personName}"`}
+                      >
+                        reported about {resolveName(record.personName).canonical}
                       </span>
                     )}
                 </div>

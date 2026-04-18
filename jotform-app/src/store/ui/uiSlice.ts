@@ -8,6 +8,7 @@ export interface UiState {
   recordSearch: string;
   sourceFilter: RecordSource[];
   fuzzyMatching: boolean;
+  viewAllRecords: boolean;
 }
 
 const initialState: UiState = {
@@ -17,6 +18,7 @@ const initialState: UiState = {
   recordSearch: '',
   sourceFilter: [],
   fuzzyMatching: true,
+  viewAllRecords: false,
 };
 
 const uiSlice = createSlice({
@@ -25,6 +27,14 @@ const uiSlice = createSlice({
   reducers: {
     personSelected(state, action: PayloadAction<string | null>) {
       state.selectedPersonName = action.payload;
+      state.selectedRecordId = null;
+      state.recordSearch = '';
+      state.sourceFilter = [];
+      state.viewAllRecords = false;
+    },
+    allRecordsSelected(state) {
+      state.viewAllRecords = true;
+      state.selectedPersonName = null;
       state.selectedRecordId = null;
       state.recordSearch = '';
       state.sourceFilter = [];
@@ -59,6 +69,7 @@ const uiSlice = createSlice({
 
 export const {
   personSelected,
+  allRecordsSelected,
   recordSelected,
   personSearchChanged,
   recordSearchChanged,

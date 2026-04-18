@@ -157,6 +157,18 @@
   font-weight: 500;
 }
 
+.primaryPill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  background: var(--accent-weak);
+  color: var(--text-h);
+  padding: 2px var(--sp-2);
+  border-radius: 999px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+
 .placeholder {
   flex: 1 1 auto;
   display: flex;

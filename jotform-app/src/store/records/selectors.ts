@@ -5,6 +5,7 @@ import type { Person } from '../../types/person';
 import {
   clusterNames,
   identityNameMap,
+  normalizeName,
   type NameClusterEntry,
 } from '../../utils/nameMatching';
 
@@ -129,9 +130,20 @@ const byTimestampAsc = (a: InvestigationRecord, b: InvestigationRecord) => {
 const selectSelectedPersonName = (state: RootState) =>
   state.ui.selectedPersonName;
 
-export const selectRecordsForSelectedPerson = createSelector(
-  [selectAllRecords, selectCanonicalNameMap, selectSelectedPersonName],
-  (records, nameMap, selected): InvestigationRecord[] => {
+const selectViewAllRecords = (state: RootState) => state.ui.viewAllRecords;
+
+export const selectVisibleRecords = createSelector(
+  [
+    selectAllRecords,
+    selectCanonicalNameMap,
+    selectSelectedPersonName,
+    selectViewAllRecords,
+  ],
+  (records, nameMap, selected, viewAll): InvestigationRecord[] => {
+    if (viewAll) {
+      return records.slice().sort(byTimestampAsc);
+    }
+
     if (!selected) return [];
 
     const aliasSet = new Set<string>();
@@ -147,29 +159,46 @@ export const selectRecordsForSelectedPerson = createSelector(
   },
 );
 
-export const selectFilteredRecordsForSelectedPerson = (
+export const selectFilteredVisibleRecords = (
   state: RootState,
 ): InvestigationRecord[] => {
-  const records = selectRecordsForSelectedPerson(state);
+  const records = selectVisibleRecords(state);
   const query = state.ui.recordSearch.trim().toLowerCase();
   const filter: RecordSource[] = state.ui.sourceFilter;
+  const fuzzy = state.ui.fuzzyMatching;
+  const nameMap = selectCanonicalNameMap(state);
+  const normalizedQuery = fuzzy ? normalizeName(query) : '';
 
   return records.filter((record) => {
     if (filter.length > 0 && !filter.includes(record.source)) return false;
     if (!query) return true;
 
+    const names = [
+      record.personName,
+      record.seenWith,
+      ...(record.mentions ?? []),
+    ].filter((n): n is string => Boolean(n));
+
+    const canonicalNames = fuzzy
+      ? names.map((n) => nameMap.get(n)?.canonical ?? n)
+      : [];
+
     const haystack = [
       record.text,
       record.location,
-      record.seenWith,
-      record.personName,
       record.timestamp,
+      ...names,
+      ...canonicalNames,
     ]
       .filter(Boolean)
       .join(' ')
       .toLowerCase();
 
-    return haystack.includes(query);
+    if (haystack.includes(query)) return true;
+    if (fuzzy && normalizedQuery) {
+      return normalizeName(haystack).includes(normalizedQuery);
+    }
+    return false;
   });
 };
 
